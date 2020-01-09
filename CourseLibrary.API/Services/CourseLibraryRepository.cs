@@ -127,12 +127,8 @@ namespace CourseLibrary.API.Services
         public PagedList<Author> GetAuthors(AuthorsResourceParameters authorsResourceParameters)
         {
             if (authorsResourceParameters == null)
-                throw new ArgumentException(nameof(authorsResourceParameters));
-                        
-            //if (string.IsNullOrWhiteSpace(authorsResourceParameters.MainCategory) 
-            //      && string.IsNullOrWhiteSpace(authorsResourceParameters.SearchQuery))
-            //    return GetAuthors();
-
+                throw new ArgumentException(nameof(authorsResourceParameters));                        
+            
             var collection = _context.Authors as IQueryable<Author>;
 
             if (!string.IsNullOrWhiteSpace(authorsResourceParameters.MainCategory)) {
@@ -145,6 +141,13 @@ namespace CourseLibrary.API.Services
                              || a.FirstName.Contains(searchQuery)
                              || a.LastName.Contains(searchQuery));
             }
+            if (!string.IsNullOrWhiteSpace(authorsResourceParameters.OrderBy))
+            {
+                if (authorsResourceParameters.OrderBy.ToLowerInvariant() == "name")
+                   collection = collection.OrderBy(a => a.FirstName).ThenBy(a => a.LastName);
+            }
+                
+
             return PagedList<Author>.Create(collection, 
                         authorsResourceParameters.PageNumber, 
                         authorsResourceParameters.PageSize);           
